@@ -1,0 +1,39 @@
+name: cd
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REPO_NAME: ${{ secrets.GCP_REPO_NAME }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up GCP SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build and push Docker image
+        run: gcloud builds submit --tag asia-southeast1-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/piot:latest .
+
+      - name: Deploy to Google Cloud Run
+        run: |
+          gcloud run deploy piot \
+            --image asia-southeast1-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/piot:latest \
+            --region asia-southeast1 \
+            --project ${PROJECT_ID} \
+            --service-account cloud-run-deployer@${PROJECT_ID}.iam.gserviceaccount.com \
+            --set-secrets "DB_NAME=DB_NAME:latest,DB_URL=DB_URL:latest,DB_TOKEN=DB_TOKEN:latest" \
+            --max-instances=4
+            
