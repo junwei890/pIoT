@@ -7,5 +7,6 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.117.1",
     "influxdb3-python>=0.16.0",
+    "ruff>=0.14.0",
     "uvicorn>=0.37.0",
 ]
