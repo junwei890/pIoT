@@ -1,17 +1,20 @@
 import os
+import sys
 import asyncio
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Response, status
 from influxdb_client_3 import InfluxDBClient3, Point
 
 from models.models import Kitchen_data, Living_room_data, Response_writer
 
 # Initialising a database client
+load_dotenv()
 token = os.environ.get("DB_TOKEN")
 host = os.environ.get("DB_URL")
 if token is None or host is None:
     print("database token or host not set in environment variables")
-    os.exit(1)
+    sys.exit(1)
 
 org = "IOT"
 client = InfluxDBClient3(host=host, token=token, org=org)
@@ -22,7 +25,7 @@ api = FastAPI()
 
 
 # Endpoint that ingests data from the kitchen
-@api.post("/kitchen_data/", status_code=201)
+@api.post("/kitchen_data", status_code=201)
 async def post_kitchen_data(
     kitchen_data: Kitchen_data, response: Response
 ) -> Response_writer:
@@ -67,6 +70,6 @@ async def post_living_room_data(
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return Response_writer(message=fail_msg)
 
-    success_msg = "Successful write of kitchen data to InfluxDB"
+    success_msg = "Successful write of living room data to InfluxDB"
     print(success_msg)
     return Response_writer(message=success_msg)

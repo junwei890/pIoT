@@ -34,5 +34,5 @@ jobs:
             --region asia-southeast1 \
             --project ${PROJECT_ID} \
             --service-account cloud-run-deployer@${PROJECT_ID}.iam.gserviceaccount.com \
-            --set-secrets "DB_NAME=DB_NAME:latest,DB_URL=DB_URL:latest,DB_TOKEN=DB_TOKEN:latest" \
+            --set-secrets "DB_URL=DB_URL:latest,DB_TOKEN=DB_TOKEN:latest" \
             --max-instances=4
