@@ -6,6 +6,11 @@ class Kitchen_data(BaseModel):
     stove_on: bool
 
 
+class Kitchen_data_2(BaseModel):
+    air_purity: float
+    volatile_concentration: float
+
+
 class Living_room_data(BaseModel):
     temperature: float
     humidity: float

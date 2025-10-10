@@ -6,7 +6,12 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Response, status
 from influxdb_client_3 import InfluxDBClient3, Point
 
-from models.models import Kitchen_data, Living_room_data, Response_writer
+from models.models import (
+    Kitchen_data,
+    Kitchen_data_2,
+    Living_room_data,
+    Response_writer,
+)
 
 # Initialising a database client
 load_dotenv()
@@ -24,7 +29,7 @@ database = "IoT-Data"
 api = FastAPI()
 
 
-# Endpoint that ingests data from the kitchen
+# Endpoints that ingest data from the kitchen
 @api.post("/kitchen_data", status_code=201)
 async def post_kitchen_data(
     kitchen_data: Kitchen_data, response: Response
@@ -45,6 +50,30 @@ async def post_kitchen_data(
         return Response_writer(message=fail_msg)
 
     success_msg = "Successful write of kitchen data to InfluxDB"
+    print(success_msg)
+    return Response_writer(message=success_msg)
+
+
+@api.post("/kitchen_data_2", status_code=201)
+async def post_kitchen_data_2(
+    kitchen_data_2: Kitchen_data_2, response: Response
+) -> Response_writer:
+    point = (
+        Point("data")
+        .tag("location", "kitchen_2")
+        .field("air_purity", kitchen_data_2.air_purity)
+        .field("volatile_concentration", kitchen_data_2.volatile_concentration)
+    )
+
+    try:
+        await asyncio.to_thread(client.write, database=database, record=point)
+    except Exception as e:
+        fail_msg = f"Unsuccessful write of kitchen data 2 to InfluxDB: {e}"
+        print(fail_msg)
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return Response_writer(message=fail_msg)
+
+    success_msg = "Successful write of kitchen data 2 to InfluxDB"
     print(success_msg)
     return Response_writer(message=success_msg)
 
