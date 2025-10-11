@@ -1,17 +1,17 @@
 import os
 import sys
-import asyncio
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Response
 from influxdb_client_3 import InfluxDBClient3, Point
 
 from models.models import (
-    Kitchen_data,
-    Kitchen_data_2,
-    Living_room_data,
-    Response_writer,
+    kitchen_data,
+    kitchen_data_2,
+    living_room_data,
+    response_writer,
 )
+from utils.dry import influxdb3_write
 
 # Initialising a database client
 load_dotenv()
@@ -32,73 +32,49 @@ api = FastAPI()
 # Endpoints that ingest data from the kitchen
 @api.post("/kitchen_data", status_code=201)
 async def post_kitchen_data(
-    kitchen_data: Kitchen_data, response: Response
-) -> Response_writer:
+    kitchen_data: kitchen_data, response: Response
+) -> response_writer:
+    location = "kitchen"
     point = (
         Point("data")
-        .tag("location", "kitchen")
+        .tag("location", location)
         .field("in_kitchen", kitchen_data.in_kitchen)
         .field("stove_on", kitchen_data.stove_on)
     )
 
-    try:
-        await asyncio.to_thread(client.write, database=database, record=point)
-    except Exception as e:
-        fail_msg = f"Unsuccessful write of kitchen data to InfluxDB: {e}"
-        print(fail_msg)
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return Response_writer(message=fail_msg)
-
-    success_msg = "Successful write of kitchen data to InfluxDB"
-    print(success_msg)
-    return Response_writer(message=success_msg)
+    msg = await influxdb3_write(location, database, point, client, response)
+    return response_writer(message=msg)
 
 
 @api.post("/kitchen_data_2", status_code=201)
 async def post_kitchen_data_2(
-    kitchen_data_2: Kitchen_data_2, response: Response
-) -> Response_writer:
+    kitchen_data_2: kitchen_data_2, response: Response
+) -> response_writer:
+    location = "kitchen 2"
     point = (
         Point("data")
-        .tag("location", "kitchen_2")
+        .tag("location", location)
         .field("air_purity", kitchen_data_2.air_purity)
         .field("volatile_concentration", kitchen_data_2.volatile_concentration)
     )
 
-    try:
-        await asyncio.to_thread(client.write, database=database, record=point)
-    except Exception as e:
-        fail_msg = f"Unsuccessful write of kitchen data 2 to InfluxDB: {e}"
-        print(fail_msg)
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return Response_writer(message=fail_msg)
-
-    success_msg = "Successful write of kitchen data 2 to InfluxDB"
-    print(success_msg)
-    return Response_writer(message=success_msg)
+    msg = await influxdb3_write(location, database, point, client, response)
+    return response_writer(message=msg)
 
 
-# Endpoint that ingests data from the living room environment
+# Endpoint that ingests data from the living room
 @api.post("/living_room_data", status_code=201)
 async def post_living_room_data(
-    living_room_data: Living_room_data, response: Response
-) -> Response_writer:
+    living_room_data: living_room_data, response: Response
+) -> response_writer:
+    location = "living room"
     point = (
         Point("data")
-        .tag("location", "living room")
+        .tag("location", location)
         .field("temperature", living_room_data.temperature)
         .field("humidity", living_room_data.humidity)
         .field("illumination", living_room_data.illumination)
     )
 
-    try:
-        await asyncio.to_thread(client.write, database=database, record=point)
-    except Exception as e:
-        fail_msg = f"Unsuccessful write of living room data to InfluxDB: {e}"
-        print(fail_msg)
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return Response_writer(message=fail_msg)
-
-    success_msg = "Successful write of living room data to InfluxDB"
-    print(success_msg)
-    return Response_writer(message=success_msg)
+    msg = await influxdb3_write(location, database, point, client, response)
+    return response_writer(message=msg)
