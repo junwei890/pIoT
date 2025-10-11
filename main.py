@@ -36,8 +36,7 @@ async def post_kitchen_data(
 ) -> response_writer:
     location = "kitchen"
     point = (
-        Point("data")
-        .tag("location", location)
+        Point(location)
         .field("in_kitchen", kitchen_data.in_kitchen)
         .field("stove_on", kitchen_data.stove_on)
     )
@@ -52,8 +51,7 @@ async def post_kitchen_data_2(
 ) -> response_writer:
     location = "kitchen 2"
     point = (
-        Point("data")
-        .tag("location", location)
+        Point(location)
         .field("air_purity", kitchen_data_2.air_purity)
         .field("volatile_concentration", kitchen_data_2.volatile_concentration)
     )
@@ -69,8 +67,7 @@ async def post_living_room_data(
 ) -> response_writer:
     location = "living room"
     point = (
-        Point("data")
-        .tag("location", location)
+        Point(location)
         .field("temperature", living_room_data.temperature)
         .field("humidity", living_room_data.humidity)
         .field("illumination", living_room_data.illumination)
